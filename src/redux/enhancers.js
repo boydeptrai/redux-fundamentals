@@ -26,5 +26,17 @@ const logEnhancer = (createStore) => (reducer, initialState, enhancer) =>{
     }
     return createStore(logReducer,initialState,enhancer);
 }
-const store = createStore(reducer,compose(logEnhancer,monitorEnhancer));
+const logMiddleware = (store) =>(next) => (action) =>{
+    console.log("old state", store.getState(), action);
+    next(action);
+    console.log("new state", store.getState(), action);
+}
+const monitorMiddleware = (store) =>(next) => (action) => {
+    const start = performance.now();
+    next(action);
+    const end = performance.now();
+    const diff = end - start;
+    console.log(diff);
+}
+const store = createStore(reducer,applyMiddleware(logMiddleware,monitorMiddleware));
 store.dispatch({type:" Hello"})
